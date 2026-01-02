@@ -1,6 +1,13 @@
 %-------------------------------------
-% ViTGAN Poster - Corrected for Overleaf Gemini Theme
+% This template comes from Anish Athalye (Unofficial University of Cambridge Poster Template). 
+
+% The Poster Template has been modified by Dr. Rahul Raoniar to fulfill B.Tech/Master/Ph.D./PostDoc student's poster presentation requirements.
+
+% Description: I made this unofficial Poster Template for the Indian Institute of Technology Bombay (IITB). Feel free to use it, modify it, and share it. 
+
+% Thank you note: A huge thanks goes to Anish Athalye for the original template.
 %-------------------------------------
+
 
 \documentclass[final]{beamer}
 
@@ -12,7 +19,7 @@
 \usepackage{lmodern}
 \usepackage[orientation=portrait,size=a0,scale=1.0]{beamerposter}
 \usetheme{gemini}
-\usecolortheme{nott} % Assure-toi que le fichier beamercolorthemenott.sty est présent, sinon change pour 'mit' ou 'gemini'
+\usecolortheme{nott}
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{tikz}
@@ -20,17 +27,34 @@
 \pgfplotsset{compat=1.14}
 \usepackage{anyfontsize}
 \usepackage{xcolor}
+\usepackage[skip=2pt,font=normalsize]{subcaption}
+\usepackage{adjustbox}
 
 % ----------------------------------
-% TikZ Styles
+% For plotting study methodology
 % ----------------------------------
-\usetikzlibrary{shapes.geometric, arrows, positioning}
-\tikzstyle{process} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=white]
-\tikzstyle{arrow} = [thick,->,>=stealth]
+
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows}
+
+% Defining Tickz Style
+\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm, text centered, text width = 10cm, draw=black, fill=white]
+
+% \tikzstyle{io} = [trapezium, trapezium left angle=70, trapezium right angle=110, minimum width=3cm, minimum height=1cm, text centered, text width = 4.5cm, draw=black, fill=blue!30]
+
+\tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, text width = 6cm, draw=black, fill=white, text width = 10cm]
+
+% \tikzstyle{decision} = [diamond, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=green!30]
+
+\tikzstyle{arrow} = [ultra thick,->,>=stealth]
+
 
 % ====================
 % Lengths
 % ====================
+
+% If you have N columns, choose \sepwidth and \colwidth such that
+% (N+1)*\sepwidth + N*\colwidth = \paperwidth
 \newlength{\sepwidth}
 \newlength{\colwidth}
 \setlength{\sepwidth}{0.025\paperwidth}
@@ -42,19 +66,31 @@
 % Title
 % ====================
 
-\title{ViTGAN: Training GANs with Vision Transformers}
+\title{Unpaired Image-to-Image Translation using Cycle-Consistent Adversarial Networks}
 
-\author{Kwonjoon Lee\inst{1,3} \and Huiwen Chang\inst{2} \and Lu Jiang\inst{2} \and Han Zhang\inst{2} \and Zhuowen Tu\inst{1} \and Ce Liu\inst{4}}
+\author{Jun-Yan Zhu \and Taesung Park \and Phillip Isola \and Alexei A. Efros
+  \\[0.5em] 
+  {\large \textbf{Review by: Victorin Turnel and Adèle Dejoie}}
+}
 
-\institute[shortinst]{\inst{1} UC San Diego \samelineand \inst{2} Google Research \samelineand \inst{3} Honda Research Institute \samelineand \inst{4} Microsoft Azure AI}
 
 % ====================
-% Footer
+% Footer (optional)
 % ====================
+
 \footercontent{
-  \textbf{ICLR 2022} \hfill
-  \textbf{Paper: arXiv:2107.04589} \hfill
-  \href{mailto:kwl042@eng.ucsd.edu}{\textbf{Contact Author}}}
+  \href{https://www.lipsum.com}{\textbf{https://www.lipsum.com}} \hfill
+  \textbf{Ph.D. Connect Conclave 2023} \hfill
+  \href{mailto:your.email@provider.com}{\textbf{your.email@provider.com}}}
+% (can be left out to remove footer)
+
+
+% ====================
+% Logo (optional)
+% ====================
+
+% use this to include logos on the left and/or right side of the header:
+\logoleft{\includegraphics[height=5cm]{logos/logo_mva.png}}
 
 % ====================
 % Body
@@ -66,165 +102,208 @@
 \begin{columns}[t]
 \separatorcolumn
 
-% ====================
-% COLUMN 1
-% ====================
 \begin{column}{\colwidth}
 
 % ----------------------------------
 % Abstract
 % ----------------------------------
-  \begin{block}{Abstract}
-    Recently, Vision Transformers (ViTs) have shown competitive performance on image recognition. In this work, we investigate if such performance can be extended to \textbf{image generation} (GANs) without using convolutions. We identify that standard ViTs cause serious instability in GAN training. We introduce \textbf{ViTGAN}, which integrates novel regularization techniques for the discriminator and architectural choices for the generator, achieving performance comparable to state-of-the-art CNN-based GANs (StyleGAN2).
+  \begin{block}{Problem \& Motivation}
+    \textbf{Context :} Image-to-image translation is a class of vision and graphic problems where the goal is to map an inpuy image to  n output image (e.g. grayscale to color, edges to photo). Powerful systems have been developed for the supervised setting which relies on a training set of aligned image pairs.
+
+    \begin{center}
+        \includegraphics[width=0.6\linewidth]{images/unlabeled.png}
+    \end{center}
+
+    \textbf{The challenge :} However, obtaining paired training data is often difficult and expensive. For tasks like artistic stylization or object transfiguration (e.g. zebra \leftrightarrow horse) the output is not even well defined and paried examples simply don't exist.
+
+    \textbf{The goal :} The authors present an approach to learn the mapping between between a source domain $X$ and a target domain $Y$ in the absence of paired examples.
+
   \end{block}
   
 % ----------------------------------
-% Introduction
+% Section: Method
 % ----------------------------------
-  \begin{block}{Introduction \& Motivation}
-    Convolutional Neural Networks (CNNs) dominate computer vision due to inductive biases. However, Vision Transformers (ViTs) capture long-range dependencies via self-attention.
-    
-    \vspace{0.5em}
-    \textbf{The Gap:} While ViTs excel at classification, using them for \textbf{generative adversarial training} is challenging due to severe instability.
-    
-    \vspace{0.5em}
-    \textbf{Research Question:} Can we build a GAN entirely out of Vision Transformers (without convolutions) that matches the quality of CNN-based GANs?
-  \end{block}
+  \begin{alertblock}{Method}
 
-% ----------------------------------
-% Challenges
-% ----------------------------------
-  \begin{alertblock}{The Challenge: Training Instability}
-    Standard regularization techniques (Gradient Penalty, Spectral Norm) used in CNN-GANs fail with ViTs.
-    
+    \heading{Adversarial Loss (Matching Distributions)}
+    The goal of this module is to implement two Generative Adversarial Networks (GAN) to learn the mappings:
     \begin{itemize}
-        \item \textbf{Lipschitz Continuity:} Standard dot-product self-attention can have an unbounded Lipschitz constant, violating GAN discriminator requirements.
-        \item \textbf{Gradient Variance:} Adversarial training is hindered by high-variance gradients in later stages.
+      \item \textbf{Forward Mapping $(G : X \rightarrow Y)$} : The generator $G$ tries to produce images $G(x)$ that are indistinguishable from real image in domain $Y$.
+      \item \textbf{Backward Mapping $(F : Y \rightarrow X)$} : Similarly, the generator $F$ tries to produce images $F(y)$ that look like real images in domain X.
+      \item \textbf{Discriminators (D_Y​ and D_X​)} $D_Y$ aims to distinguish between real samples $y$ and generated samples $G(x)$, while $D_X$ distinguishes between real $x$ and generated $F(y)$.
     \end{itemize}
+
+    \begin{center}
+        \includegraphics[width=1\linewidth]{images/gd.png}
+    \end{center}
+
+    \heading{Cycle Consistency (Preserving Content)}
+    Adversarial losses alone are insufficient because a network could map an image to any random permutation of images in the target domain (model collapse). To constrain the problem and preserve structural content, the cycle consistency is introduced : 
+    \begin{itemize}
+      \item \textbf{Forward Cycle} : If we translate from $X$ to $Y$ and back, we should arrive at the original image: $x \rightarrow G(x) \rightarrow F(G(x)) \approx x$.
+      \item \textbf{Backward Cycle} : Similarly, for domain $Y$ : $y \rightarrow F(y) \rightarrow G(F(y)) \approx y$.
+      \item The goal is to enforce the reconstructed image to be as close as possible to the original sample.
+    \end{itemize}
+
   \end{alertblock}
 
 % ----------------------------------
-% Methodology: Generator
+% Section: Research objectives
 % ----------------------------------
- \begin{block}{Method: ViTGAN Generator}
-    The generator maps a latent noise vector $z$ to a sequence of image patches.
-    
-    \textbf{1. Self-Modulated LayerNorm (SLN)}:
-    Instead of feeding $z$ as input tokens, we use $z$ to \textbf{modulate} the normalization layers:
-    $$ \text{SLN}(h_l, w) = \gamma_l(w) \odot \frac{h_l - \mu}{\sigma} + \beta_l(w), \quad w = \text{MLP}(z) $$
-    
-    \textbf{2. Implicit Neural Representation}:
-    To generate pixels from patch embeddings, we use Fourier-feature based implicit representation ($E_{fou}$) enhancing spatial smoothness.
+  \begin{block}{Objective function}
 
-    % --- TikZ Diagram ---
-    \vspace{1cm}
-    \begin{center}
-    \begin{tikzpicture}[node distance=2cm]
-        \node (noise) [process, fill=blue!10] {Latent $z$};
-        \node (map) [process, right of=noise, xshift=4cm] {Mapping Network};
-        \node (trans) [process, below of=map, fill=green!10, text width=8cm] {Transformer Encoder (SLN)};
-        \node (patch) [process, below of=trans, fill=orange!10] {Implicit Representation};
-        \node (img) [process, below of=patch, fill=red!10] {Generated Image};
+  \heading{Adversarial Loss}
+  For the mapping function $G : X \rightarrow Y$ and its discriminator $D_Y$, we can express the objective as : 
 
-        \draw [arrow] (noise) -- (map);
-        \draw [arrow] (map) -- node[right] {$w$} (trans);
-        \draw [arrow] (trans) -- (patch);
-        \draw [arrow] (patch) -- (img);
-    \end{tikzpicture}
-    \end{center}
+  $$\mathcal{L}_{GAN}(G, D_Y, X, Y) = \mathrel{E}_{y \sim p_{data}(y)}[\log D_Y(y)] + \mathrel{E}_{x \sim p_{data}(x)}[\log(1 - D_Y(G(x)))]$$
+
+  $G$ aims to minimize this objective against an adversary D that tries to maximize it : $\min_G \max_D_Y \mathcal{L}_{GAN}(G, D_Y, X, Y)$. Similarly, for the mapping function $F : Y \rightarrow X$ and its discriminator $D_X$ : $\min_F \max_D_X \mathcal{L}_{GAN}(F, D_X, X, Y)$
+
+  \heading{Cycle Consistency Loss}
+  The loss function is built so that for each image $x$ from domain $X$, it brings $x$ back to the original image (similarly for y). Therefore, we can define : 
+  $$\mathcal{L}_{cyc}(C, F) = \mathrel{E}_{x \sim p_{data}(x)}[\vert \vert F(G(x)) - x \vert \vert_1] + \mathrel{E}_{y \sim p_{data}(y)}[\vert \vert G(F(y)) - y \vert \vert_1]$$
+
+  \heading{Full objective}
+  Then, the final objective function is made of the previous loss functions : 
+  $$\mathcal{L}(G, F, D_X, D_Y) = \mathcal{L}_{GAN}(G, D_Y, X, Y) + \mathcal{L}_{GAN}(F, D_X, Y, X) + \lambda \mathcal{L}_{cyc}(G, F)$$
+  where $\lambda$ controls the relative importance of the two objectives. Therefore, we aim at solving the following problem :
+  $$G*, F* = \arg \min_{G, F} \max_{D_X, D_Y} \mathcal{L}(G, F, D_X, D_Y)$$
+
+  \end{block}
+
+% ----------------------------------
+% Section: Study methodology
+% ----------------------------------
+ \begin{block}{Study methodology}
+    The present study adopted the following step-by-step methodology to achieve the research objectives.
+ 
+    \input{images/figure1}
+
  \end{block}
 
+% -------------------------------
+% Section: Site selection and data collection
+% -------------------------------
+\begin{block}{Site selection and data collection}
+    Sed et augue accumsan nibh ullamcorper accumsan. Nam dictum urna tortor, ut pretium leo eleifend efficitur. Mauris pretium, elit non posuere rhoncus, tortor enim dapibus lacus, a vehicula orci diam sit amet urna. In hac habitasse platea dictumst. Cras ut fermentum nunc, id interdum ex. Donec tincidunt metus nulla, a interdum ante efficitur cursus.  
+
+    Sed et augue accumsan nibh ullamcorper accumsan. Nam dictum urna tortor, ut pretium leo eleifend efficitur. Mauris pretium, elit non posuere rhoncus, tortor enim dapibus lacus, a vehicula orci diam sit amet urna. In hac habitasse platea dictumst. Cras ut fermentum nunc, id interdum ex. Donec tincidunt metus nulla, a interdum ante efficitur cursus.
+    
+\end{block}
+
+% -------------------------------
+% Section: Descriptive Statistics
+% -------------------------------
+
+\begin{block}{Descriptive statistics}
+    \begin{itemize}
+        \item Sed et augue accumsan nibh 45\% ullamcorper accumsan.
+        \item Sed et augue accumsan nibh ullamcorper accumsan. Nam dictum urna tortor, ut pretium leo eleifend efficitur. 
+        \item Nullam at velit facilisis nibh vulputate porta a sit amet metus.
+        \item Maecenas eget nunc suscipit, luctus nisl non, tristique felis.
+        \item Maecenas tellus diam, placerat sit amet nisl at, dapibus imperdiet arcu.
+    \end{itemize} 
+\end{block}
+
 \end{column}
 
 \separatorcolumn
 
-% ====================
-% COLUMN 2
-% ====================
 \begin{column}{\colwidth}
 
-% ----------------------------------
-% Methodology: Discriminator
-% ----------------------------------
-\begin{block}{Method: ViTGAN Discriminator}
-    To enforce stability and Lipschitz continuity:
-    
+% -------------------------------
+% Section: Results and discussion
+% -------------------------------
+
+\begin{block}{Results and discussion}
+    \heading{Model estimates}
+    Pellentesque eget convallis lorem, vel vestibulum nisl. Vivamus suscipit augue at ipsum commodo semper. Duis hendrerit, metus non scelerisque ultricies, libero dolor malesuada diam, fermentum scelerisque augue justo a erat.
+
+    \input{images/figure2}
+
+    Cras ut fermentum nunc, id interdum ex. Donec tincidunt metus nulla, a interdum ante efficitur cursus. Proin justo mauris, imperdiet vel efficitur ac, lobortis et neque. Etiam ac iaculis libero.
+
+    \input{tables/table1}
+
+\end{block}
+
+% -------------------------------
+% Section: Conclusions
+% -------------------------------
+   \begin{block}{Conclusions}
     \begin{itemize}
-        \item \textbf{L2 Attention:} Replaces dot-product similarity with Euclidean distance.
-        $$ \text{Attention}(X) = \text{softmax}\left(-\frac{d(XW_q, XW_k)}{\sqrt{d_h}}\right) $$
-        \item \textbf{Improved Spectral Normalization (ISN):} Enforced at initialization to prevent rank-1 collapse.
-        \item \textbf{Overlapping Patches:} Allows overlap to preserve local information.
+      \item Sed et augue accumsan nibh ullamcorper accumsanam dictum urna tortor, ut pretium leo eleifend.  
+      \item Donec suscipit, urna quis tempus consectetur, quam est placerat ante, et scelerisque metus velit. 
+      \item Nam dictum urna tortor, ut pretium leo eleifend efficitur.
+      \item Praesent blandit faucibus quam, et tincidunt mauris sagittis eget 2.2\%.
+      \item Dolor sit amet, consectetur adipiscing elit. Mauris in nulla ultricies suscipit.
     \end{itemize}
-\end{block}
-
-% ----------------------------------
-% Experiments
-% ----------------------------------
-\begin{block}{Experiments \& Results}
-    \textbf{Stability Analysis (CIFAR-10):}
-    Our techniques stabilize training where baselines fail.
-    
-    \vspace{0.5em}
-    \begin{table}
-    \centering
-    \begin{tabular}{l c c}
-    \toprule
-    \textbf{Regularization Method} & \textbf{FID} ($\downarrow$) & \textbf{IS} ($\uparrow$) \\
-    \midrule
-    Baseline + R1 Penalty & NaN (Fail) & NaN \\
-    Baseline + Spectral Norm & 10.2 & 8.78 \\
-    $L_2$ + SN & 16.8 & 2.36 \\
-    \textbf{$L_2$ + ISN + Overlap (Ours)} & \textbf{4.92} & \textbf{9.69} \\
-    \bottomrule
-    \end{tabular}
-    \caption{Ablation study of regularization techniques.}
-    \end{table}
-
-    \vspace{1em}
-    \textbf{Comparison with SOTA:}
-    ViTGAN achieves FID of \textbf{4.92} on CIFAR-10, comparable to StyleGAN2 (FID 5.60).
-\end{block}
-
-% ----------------------------------
-% Visual Results Placeholder
-% ----------------------------------
-   \begin{block}{Visual Results}
-    \begin{center}
-        % Remplacer ce bloc TikZ par \includegraphics quand vous aurez l'image
-        \begin{tikzpicture}
-            \draw[fill=gray!20, draw=gray!50, dashed] (0,0) rectangle (15,8);
-            \node at (7.5,4) {\Huge \textcolor{gray}{Insert Figure 3 Here}};
-            \node at (7.5,2.5) {\large (Generated Samples)};
-        \end{tikzpicture}
-    \end{center}
-    
-    Generated images show high fidelity and coherent structures, avoiding typical CNN texture artifacts.
   \end{block}
 
-% ----------------------------------
-% Conclusion
-% ----------------------------------
-  \begin{exampleblock}{Conclusion}
+
+% -------------------------------
+% Section: What is already known about this subject?
+% -------------------------------
+  \begin{exampleblock}{What is already known about this subject?}
+
     \begin{itemize}
-      \item We demonstrated that \textbf{purely Transformer-based GANs} are viable.
-      \item Key contributions (L2 Attention, ISN, SLN) effectively solve instability.
-      \item ViTGAN closes the performance gap with CNN-based models like StyleGAN2.
+      \item \textbf{Lorem ipsum dolor sit amet}, consectetur adipiscing elit. Mauris in nulla ac leo ultricies suscipit.
+      \item The \textbf{Duis vestibulum augue} in leo placerat, sit amet pharetra mi elementum.
+      \item \textbf{Fusce sit amet} velit pulvinar, feugiat velit sit amet, tristique dolor.
     \end{itemize}
+
   \end{exampleblock}
 
-% ----------------------------------
-% References
-% ----------------------------------
+  
+% -------------------------------
+% Section: What does this study add?
+% -------------------------------
+  \begin{exampleblock}{What does this study add?}
+    \begin{itemize}
+      \item Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris in nulla ac leo ultricies suscipit.
+      \item The Duis vestibulum augue in leo placerat, sit amet pharetra mi elementum.
+      \item Fusce sit amet velit pulvinar, feugiat velit sit amet, tristique dolor.
+    \end{itemize}
+
+  \end{exampleblock}
+
+
+% -------------------------------
+% Section: Practical Implications
+% -------------------------------
+  \begin{exampleblock}{Practical implications}
+    \begin{itemize}
+      \item Ipsum dolor sit amet, consectetur adipiscing elit. Mauris in nulla ultricies suscipit.
+      \item Duis augue in leo placerat, sit amet pharetra mi elementum.
+      \item Sit amet pulvinar, feugiat velit sit amet, tristique dolor.
+    \end{itemize}
+
+  \end{exampleblock}
+
+% -------------------------------
+% Section: References
+% ------------------------------- 
+
   \begin{block}{References}
-    \footnotesize
-    \begin{thebibliography}{10}
-    \bibitem{lee2022} Lee, K. et al. (2022). ViTGAN: Training GANs with Vision Transformers. \textit{ICLR}.
-    \bibitem{dosovitskiy2021} Dosovitskiy, A. et al. (2021). An Image is Worth 16x16 Words. \textit{ICLR}.
-    \end{thebibliography}
+
+    \nocite{*}
+    \footnotesize{\bibliographystyle{plain}\bibliography{poster}}
+
+  \end{block}
+
+% -------------------------------
+% Section: Portfolio
+% -------------------------------
+  \begin{block}{Author$^{1}$ Portfolio Website}
+    
+    \input{images/figure3}
+
   \end{block}
 
 \end{column}
 \separatorcolumn
+
+
 
 \end{columns}
 \end{frame}
